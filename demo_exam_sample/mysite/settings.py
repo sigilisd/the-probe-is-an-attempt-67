@@ -119,4 +119,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# В dev-режиме статика будет доступна по адресу /static/...
+STATIC_URL = '/shoe_store/'
+
+# В режиме разработки брать статику (картинки и др.)
+# из папки приложения shoe_store, где лежит каталог img.
+STATICFILES_DIRS = [
+    BASE_DIR / 'shoe_store',
+]

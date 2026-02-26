@@ -71,20 +71,35 @@ class ProductsForm(forms.ModelForm):
 
     class Meta:
         model = Products
-        fields = ['article', 'product_name', 'unit_id', 'price', 'provider_id', 'producer_id', 'category_id', 'discount', 'amount', 'description', 'photo']
+        exclude = ['id']
+        fields = ['article', 'product_name', 'unit', 'price', 'provider', 'producer', 'category', 'discount', 'amount', 'description', 'photo']
         widgets = {
             'article': forms.TextInput(),
             'product_name': forms.TextInput(),
-            'unit_id': forms.Select(),
+            'unit': forms.Select(),
             'price': forms.NumberInput(),
-            'provider_id': forms.Select(),
-            'producer_id': forms.Select(),
-            'category_id': forms.Select(),
+            'provider': forms.Select(),
+            'producer': forms.Select(),
+            'category': forms.Select(),
             'discount': forms.NumberInput(),
             'amount': forms.NumberInput(),
             'description': forms.Textarea(),
             'photo': forms.TextInput(),
         }
+        labels = {
+            'article': 'Артикул',
+            'product_name': 'Наименование товара',
+            'unit': 'Единица измерения',
+            'price': 'Цена',
+            'provider': 'Поставщик',
+            'producer': 'Производитель',
+            'category': 'Категория',
+            'discount': 'Скидка, %',
+            'amount': 'Количество на складе',
+            'description': 'Описание',
+            'photo': 'Имя файла изображения (1.jpg и т.п.)',
+        }
+
 
 class Products_in_ordersForm(forms.ModelForm):
 
@@ -98,23 +113,14 @@ class Products_in_ordersForm(forms.ModelForm):
         }
 
 class UsersForm(forms.ModelForm):
-    model = Users
-    fields = ['role_id', 'last_name', 'first_name', 'patronymic', 'email'. 'password']
-    widgets = {
-        'role_id': forms.Select(),
-        'last_name': forms.TextInput(),
-        'first_name': forms.TextInput(),
-        'patronymic': forms.TextInput(),
-        'email': forms.EmailInput(),
-        'password': forms.PasswordInput(),
-    }
-# СОЗДАНИЕ ФОРМЫ ДЛЯ ВХОДА
-class LoginForm(forms.Form):
-    email = forms.EmailField(
-        widget=forms.EmailInput().
-        label='Email',
-    )
-    password = forms.CharField(
-        widget=forms.PasswordInput(),
-        label='Password',
-    )
+    class Meta:
+        model = Users
+        fields = ['role_id', 'last_name', 'first_name', 'patronymic', 'email', 'password']
+        widgets = {
+            'role_id': forms.Select(),
+            'last_name': forms.TextInput(),
+            'first_name': forms.TextInput(),
+            'patronymic': forms.TextInput(),
+            'email': forms.EmailInput(),
+            'password': forms.PasswordInput(),
+        }

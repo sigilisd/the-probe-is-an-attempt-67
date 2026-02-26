@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Список товаров{% endblock %}
+{% block header_title %}Каталог обуви{% endblock %}
+
+{% block content %}
+    <h1>Наши товары</h1>
+
+    {% if user_role == 'Администратор' %}
+        <p>
+            <a href="{% url 'product_create' %}">Добавить товар</a> |
+            <a href="{% url 'orders_list' %}">Просмотр заказов</a>
+        </p>
+    {% elif user_role == 'Менеджер' %}
+        <p>
+            <a href="{% url 'orders_list' %}">Просмотр заказов</a>
+        </p>
+    {% endif %}
+
+    {# Фильтры и сортировка доступны только не-гостям #}
+    {% if user_role and user_role != 'Гость' %}
+        <div class="filters" style="margin-bottom: 20px; padding: 10px; background: #f4f4f4;">
+            <form method="get" id="filters-form">
+                <input type="text" name="search" placeholder="Поиск..." value="{{ request.GET.search }}" oninput="this.form.submit()">
+
+                <select name="sort" onchange="this.form.submit()">
+                    <option value="">Сортировка (Количество)</option>
+                    <option value="asc" {% if request.GET.sort == 'asc' %}selected{% endif %}>По возрастанию</option>
+                    <option value="desc" {% if request.GET.sort == 'desc' %}selected{% endif %}>По убыванию</option>
+                </select>
+
+                <select name="provider" onchange="this.form.submit()">
+                    <option value="">Все поставщики</option>
+                    {% for p in providers %}
+                        <option value="{{ p.id }}" {% if request.GET.provider == p.id|stringformat:"i" %}selected{% endif %}>
+                            {{ p.provider_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <a href="{% url 'products_list' %}">Сбросить</a>
+            </form>
+        </div>
+    {% endif %}
+
+    <div class="product-container">
+        {% for product in products %}
+
+            <div style="
+                border: 1px solid black;
+                margin: 10px;
+                padding: 10px;
+                {% if product.amount == 0 %}
+                    background-color: lightblue;
+                {% elif product.discount > 15 %}
+                    background-color: #2E8B57;
+                {% endif %}
+            ">
+
+                {% if product.photo %}
+                    <img src="{% static 'img/'|add:product.photo %}" alt="Фото товара" width="100">
+                {% else %}
+                    <img src="{% static 'img/picture.png' %}" alt="Фото товара" width="100">
+                {% endif %}
+
+                <h3>{{ product.product_name }}</h3>
+                <p>Описание товара: {{ product.description }}</p>
+                <p>Производитель: {{ product.producer.producer_name }}</p>
+                <p>Поставщик: {{ product.provider.provider_name }}</p>
+                {% if product.discount > 0 %}
+                    <p>Цена:
+                        <s style="color: red;">{{ product.price }} руб.</s>
+                        <span style="color: black; font-weight: bold;">{{ product.final_price }} руб.</span>
+                    </p>
+                {% else %}
+                    <p>Цена: {{ product.price }} руб.</p>
+                {% endif %}
+                <p>Единица измерения: {{ product.unit.unit_name }}</p>
+                <p>Количество на складе: {{ product.amount }} </p>
+
+                {% if user_role == 'Администратор' %}
+                    <p>
+                        <a href="{% url 'product_update' product.id %}">Редактировать</a> |
+                        <a href="{% url 'product_delete' product.id %}">Удалить</a>
+                    </p>
+                {% endif %}
+
+            </div>
+
+        {% empty %}
+            <p>В базе данных пока нет товаров.</p>
+        {% endfor %}
+    </div>
+
+    <script>
+        (function() {
+            const input = document.querySelector('input[name="search"]');
+            if (!input) return;
+            // После перезагрузки страницы сразу ставим курсор в поле поиска
+            input.focus();
+            const len = input.value.length;
+            try {
+                input.setSelectionRange(len, len);
+            } catch (e) {}
+        })();
+    </script>
+{% endblock %}

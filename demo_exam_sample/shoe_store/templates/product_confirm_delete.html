@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление товара{% endblock %}
+{% block header_title %}Удаление товара{% endblock %}
+
+{% block content %}
+  <h3>Удалить товар "{{ product.product_name }}"?</h3>
+
+  {% if error %}
+      <p style="color: red;">{{ error }}</p>
+      <button type="button" onclick="history.back()">Назад</button>
+  {% else %}
+      <form method="post">
+          {% csrf_token %}
+          <p>Вы уверены, что хотите удалить этот товар?</p>
+          <button type="submit">Удалить</button>
+          <button type="button" onclick="history.back()">Отмена</button>
+      </form>
+  {% endif %}
+{% endblock %}
+

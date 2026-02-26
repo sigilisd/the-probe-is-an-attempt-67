@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Магазин обуви{% endblock %}</title>
+    <style>
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #ccc; }
+        .logo { width: 50px; }
+        .user-info { text-align: right; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{% static 'img/Icon.JPG' %}" alt="Логотип" class="logo">
+        <h2>{% block header_title %}{% endblock %}</h2>
+        <div class="user-info">
+            {% if request.session.user_fio %}
+                <span>{{ request.session.user_fio }}</span> |
+                <a href="{% url 'login' %}">Выход</a>
+            {% else %}
+                <span>Гость</span> |
+                <a href="{% url 'login' %}">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

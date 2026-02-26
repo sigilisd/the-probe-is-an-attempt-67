@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 
 # ПОСЛЕ ПОДКЛЮЧЕНИЯ БАЗЫ ДАННЫХ МЫ СОЗДАЕМ МОДЕЛИ ПО ТАБЛИЦА ИЗ НАШЕЙ БД ЭТО ШАГ ДВА!!!
 
@@ -22,7 +23,7 @@ class Category(models.Model):
         return self.category_name # ЭТА СТРОКА ПОЗВОЛЯЕТ НАМ ВЫВЕСТИ СТРОКУ С НАЗВАНИЕМ КАТЕГОРИИ И Т.Д.
 
 class Order_statuses(models.Model):
-    order_statuses_name = models.CharField(max_length=255)
+    order_status_name = models.CharField(max_length=255)
 
     class Meta:
         managed = False 
@@ -34,8 +35,8 @@ class Order_statuses(models.Model):
 class Orders(models.Model):
     order_date = models.DateField()
     delivery_date = models.DateField()
-    pickup_points_id = models.ForeignKey('Pickup_points', on_delete=models.CASCADE, related_name='Orders', db_column='pickup_point_id')
-    user_id = models.ForeignKey('User', on_delete=models.CASCADE, related_name='Orders', db_column='user_id')
+    pickup_points_id = models.ForeignKey('Pickup_points', on_delete=models.CASCADE, related_name='Orders', db_column='pickup_points_id')
+    user_id = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='Orders', db_column='user_id')
     delivery_code = models.CharField(max_length=255)
     status_id = models.ForeignKey('Order_statuses', on_delete=models.CASCADE, related_name='Orders', db_column='status_id')
 
@@ -66,17 +67,18 @@ class Producers(models.Model):
         managed = False
         db_table = 'producers'
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return self.producer_name
 
 class Products(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='id')
     article = models.CharField(max_length=255)
     product_name = models.CharField(max_length=255)
-    unit_id = models.ForeignKey('Unit', on_delete=models.CASCADE, related_name='Products', db_column='unit_id')
+    unit = models.ForeignKey('Units', on_delete=models.CASCADE, related_name='Products', db_column='unit_id')
     price = models.PositiveIntegerField()
-    provider_id = models.ForeignKey('Provider', on_delete=models.CASCADE, related_name='Products', db_column='provider_id')
-    producer_id = models.ForeignKey('Producer', on_delete=models.CASCADE, related_name='Products', db_column='producer_id')
-    category_id = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='Products', db_column='category_id')
+    provider = models.ForeignKey('Providers', on_delete=models.CASCADE, related_name='Products', db_column='provider_id')
+    producer = models.ForeignKey('Producers', on_delete=models.CASCADE, related_name='Products', db_column='producer_id')
+    category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='Products', db_column='category_id')
     discount = models.PositiveIntegerField()
     amount = models.PositiveIntegerField()
     description = models.TextField()
@@ -86,19 +88,27 @@ class Products(models.Model):
         managed = False
         db_table = 'products'
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return f"{self.article}, {self.product_name}, {self.price}, {self.discount}, {self.amount}, {self.description}, {self.photo}"
 
+    def save(self, *args, **kwargs):
+        # В таблице products столбец id NOT NULL и без DEFAULT,
+        # поэтому при добавлении нового товара назначаем id вручную.
+        if self.id is None:
+            max_id = type(self).objects.aggregate(max_id=Max('id'))['max_id'] or 0
+            self.id = max_id + 1
+        super().save(*args, **kwargs)
+
 class Products_in_orders(models.Model):
-    order_id = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='Products_in_orders', db_column='order_id')
-    product_id = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='Products_in_orders', db_column='product_id')
+    order_id = models.ForeignKey('Orders', on_delete=models.CASCADE, related_name='Products_in_orders', db_column='order_id')
+    product_id = models.ForeignKey('Products', on_delete=models.CASCADE, related_name='Products_in_orders', db_column='product_id')
     amount = models.PositiveIntegerField()
 
     class Meta:
         managed = False
         db_table = 'products_in_orders'
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return self.amount
 
 class Providers(models.Model):
@@ -108,7 +118,7 @@ class Providers(models.Model):
         managed = False
         db_table = 'providers'
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return self.provider_name
 
 class Roles(models.Model):
@@ -118,7 +128,7 @@ class Roles(models.Model):
         managed = False
         db_table = 'roles'
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return self.role_name
 
 class Units(models.Model):
@@ -128,11 +138,11 @@ class Units(models.Model):
         managed = False
         db_table = 'units'
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return self.unit_name
 
 class Users(models.Model):
-    role_id = models.ForeignKey('Role', on_delete=models.CASCADE, related_name='Users', db_column='role_id')
+    role_id = models.ForeignKey('Roles', on_delete=models.CASCADE, related_name='Users', db_column='role_id')
     last_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     patronymic = models.CharField(max_length=255)
@@ -143,5 +153,5 @@ class Users(models.Model):
         managed = False
         db_table = 'users'
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return f"{self.last_name}, {self.first_name}, {self.patronymic}"

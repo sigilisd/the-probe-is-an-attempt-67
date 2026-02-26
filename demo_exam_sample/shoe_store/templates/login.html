@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Авторизация{% endblock %}
+{% block header_title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div style="max-width: 300px; margin: 50px auto; text-align: center; border: 1px solid #ccc; padding: 20px;">
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="login" placeholder="Email" required style="margin-bottom: 10px; padding: 5px;"><br>
+        <input type="password" name="password" placeholder="Пароль" required style="margin-bottom: 10px; padding: 5px;"><br>
+        <button type="submit" style="padding: 5px 20px; cursor: pointer;">Войти</button>
+    </form>
+    <br>
+    <a href="{% url 'products_list' %}">Войти как гость</a>
+    
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</div>
+{% endblock %}

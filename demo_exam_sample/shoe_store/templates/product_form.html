@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Редактирование товара{% else %}Новый товар{% endif %}{% endblock %}
+{% block header_title %}{% if form.instance.pk %}Редактирование товара{% else %}Добавление товара{% endif %}{% endblock %}
+
+{% block content %}
+<h3>{% if form.instance.pk %}Редактировать товар{% else %}Добавить товар{% endif %}</h3>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Сохранить</button>
+    <button type="button" onclick="history.back()">Назад</button>
+</form>
+{% endblock %}
+

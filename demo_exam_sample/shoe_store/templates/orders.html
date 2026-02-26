@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказы{% endblock %}
+{% block header_title %}Список заказов{% endblock %}
+
+{% block content %}
+  <h3>Список заказов</h3>
+
+  {% if error %}
+      <p style="color: red;">{{ error }}</p>
+  {% else %}
+      <table border="1" cellpadding="5" cellspacing="0">
+          <tr>
+              <th>ID</th>
+              <th>Дата заказа</th>
+              <th>Дата доставки</th>
+              <th>Пункт выдачи</th>
+              <th>Клиент</th>
+              <th>Статус</th>
+          </tr>
+          {% for order in orders %}
+              <tr>
+                  <td>{{ order.id }}</td>
+                  <td>{{ order.order_date }}</td>
+                  <td>{{ order.delivery_date }}</td>
+                  <td>{{ order.pickup_points_id.city }} {{ order.pickup_points_id.street }} {{ order.pickup_points_id.building }}</td>
+                  <td>{{ order.user_id.last_name }} {{ order.user_id.first_name }} {{ order.user_id.patronymic }}</td>
+                  <td>{{ order.status_id.order_status_name }}</td>
+              </tr>
+          {% empty %}
+              <tr><td colspan="6">Заказов пока нет.</td></tr>
+          {% endfor %}
+      </table>
+  {% endif %}
+
+  <button type="button" onclick="history.back()">Назад</button>
+{% endblock %}
+
